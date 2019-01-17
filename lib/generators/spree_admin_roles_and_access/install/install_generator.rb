@@ -5,13 +5,17 @@ module SpreeAdminRolesAndAccess
       class_option :auto_run_migrations, type: :boolean, default: false
 
       def add_javascripts
-        append_file 'vendor/assets/javascripts/spree/frontend/all.js', "\n//= require spree/frontend/spree_admin_roles_and_access\n"
-        append_file 'vendor/assets/javascripts/spree/backend/all.js', "\n//= require spree/backend/spree_admin_roles_and_access\n"
+        frontend_path = 'vendor/assets/javascripts/spree/frontend/all.js'
+        backend_path = 'vendor/assets/javascripts/spree/backend/all.js'
+        append_file frontend_path, "\n//= require spree/frontend/spree_admin_roles_and_access\n" if File.exist?(frontend_path)
+        append_file backend_path, "\n//= require spree/backend/spree_admin_roles_and_access\n" if File.exist?(backend_path)
       end
 
       def add_stylesheets
-        inject_into_file 'vendor/assets/stylesheets/spree/frontend/all.css', " *= require spree/frontend/spree_admin_roles_and_access\n", before: /\*\//, verbose: true
-        inject_into_file 'vendor/assets/stylesheets/spree/backend/all.css', " *= require spree/backend/spree_admin_roles_and_access\n", before: /\*\//, verbose: true
+        frontend_path = 'vendor/assets/stylesheets/spree/frontend/all.css'
+        backend_path = 'vendor/assets/stylesheets/spree/backend/all.css'
+        inject_into_file frontend_path, " *= require spree/frontend/spree_admin_roles_and_access\n", before: /\*\//, verbose: true if File.exist?(frontend_path)
+        inject_into_file backend_path, " *= require spree/backend/spree_admin_roles_and_access\n", before: /\*\//, verbose: true if File.exist?(backend_path)
       end
 
       def add_migrations

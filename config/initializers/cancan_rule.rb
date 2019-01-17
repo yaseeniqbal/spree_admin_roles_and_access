@@ -11,17 +11,17 @@ CanCan::Rule.class_eval do
   end
 
   # Matches the subject, action, and given attribute. Conditions are not checked here.
-  def relevant?(action, subject, attribute = nil)
+  def relevant?(action, subject, attributes=[])
     subject = subject.values.first if subject.class == Hash
-    @match_all || (matches_action?(action) && matches_subject?(subject) && matches_attribute?(attribute))
+    @match_all || (matches_action?(action) && matches_subject?(subject) && matches_attribute?(attributes))
   end
 
   # Matches the block or conditions hash
-  def matches_conditions?(action, subject, attribute = nil)
+  def matches_conditions?(action, subject, attributes=[])
     if @match_all
       call_block_with_all(action, subject)
     elsif @block && !subject_class?(subject)
-      @block.arity == 1 ? @block.call(subject) : @block.call(subject, attribute)
+      @block.arity == 1 ? @block.call(subject) : @block.call(subject, attributes)
     elsif @conditions.kind_of?(Hash) && subject.class == Hash
       nested_subject_matches_conditions?(subject)
     elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
@@ -38,13 +38,18 @@ CanCan::Rule.class_eval do
 
   private
 
-  def matches_attribute?(attribute)
+  def matches_attribute?(attributes=[])
     # don't consider attributes in a cannot clause when not matching - this can probably be refactored
-    if !@base_behavior && @attributes && attribute.nil?
+    attributes.compact!
+    if !@base_behavior && @attributes && (attributes.nil? || attributes.empty?)
       false
     else
-      attribute = attribute.is_a?(Array) ? attribute.map(&:to_sym) : attribute.try(:to_sym)
-      @attributes.nil? || attribute.nil? || ([attribute].flatten - @attributes).empty?
+      attributes = if attributes.is_a?(Array)
+        attributes.map { |attribute| attribute.try(:to_sym) }.compact!
+      else
+        attributes.try(:to_sym)
+      end
+      @attributes.nil? || attributes.nil? || attributes.empty? || ([attributes].flatten - @attributes).empty?
     end
   end
 end

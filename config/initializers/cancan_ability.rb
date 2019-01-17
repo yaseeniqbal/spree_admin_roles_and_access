@@ -1,22 +1,22 @@
 CanCan::Ability.module_eval do
-  def relevant_rules(action, subject, attribute = nil)
+  def relevant_rules(action, subject, attributes=[])
     rules.reverse.select do |rule|
       rule.expanded_actions = expand_actions(rule.actions)
-      rule.relevant? action, subject, attribute
+      rule.relevant? action, subject, attributes
     end
   end
 
-  def relevant_rules_for_match(action, subject, attribute = nil)
-    relevant_rules(action, subject, attribute).each do |rule|
+  def relevant_rules_for_match(action, subject, attributes=[])
+    relevant_rules(action, subject, attributes).each do |rule|
       if rule.only_raw_sql?
         raise ::Exception, "The can? and cannot? call cannot be used with a raw sql 'can' definition. The checking code cannot be determined for #{action.inspect} #{subject.inspect}"
       end
     end
   end
 
-  def can?(action, subject, attribute = nil)
-    match = relevant_rules_for_match(action, subject, attribute).detect do |rule|
-      rule.matches_conditions?(action, subject, attribute)
+  def can?(action, subject, *attributes)
+    match = relevant_rules_for_match(action, subject, attributes).detect do |rule|
+      rule.matches_conditions?(action, subject, attributes)
     end
     match ? match.base_behavior : false
   end
