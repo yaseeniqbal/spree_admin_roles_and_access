@@ -5,7 +5,8 @@ class Spree::Admin::DefaultAdminDashboardsController < Spree::Admin::BaseControl
   def show
   end
 
-  private def authorize_user_has_admin_role
+  private
+  def authorize_user_has_admin_role
     user = try_spree_current_user
     raise CanCan::AccessDenied unless user.present?
     raise CanCan::AccessDenied unless user.roles.any? { |role| role.admin_accessible? }

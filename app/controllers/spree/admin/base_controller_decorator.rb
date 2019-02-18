@@ -10,7 +10,7 @@ Spree::Admin::BaseController.class_eval do
       end
       raise if record.blank?
     rescue
-      record = "#{params[:controller]}"
+      record = controller_name
     end
     authorize! :admin, record
     authorize_with_attributes! params[:action].to_sym, record, params[controller_name.singularize]
