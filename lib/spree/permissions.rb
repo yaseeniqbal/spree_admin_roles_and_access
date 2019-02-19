@@ -63,6 +63,13 @@ module Spree
       current_ability.can :admin, Spree::Config
     end
 
+    define_method('can-vendor-spree/products') do |current_ability, user|
+      @vendor_ids = user.vendors.pluck(:id)
+      current_ability.cannot :display, Spree::Product
+      current_ability.can :manage, Spree::Product, vendor_id: @vendor_ids
+      current_ability.can :create, Spree::Product
+    end
+
     private
       def find_action_and_subject(name)
         can, action, subject, attribute = name.to_s.split('-')
