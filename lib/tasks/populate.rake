@@ -130,9 +130,9 @@ namespace :spree_roles do
     desc "Create admin username and password"
     task populate: :environment do
       default_permission      = make_permission('default-permissions', 0)
-      vendor_products  = make_permission('can-vendor-spree/products', 0)
+      
       default_permission_set  = make_permission_set(
-          [default_permission,vendor_products],
+          [default_permission],
           'default',
           'Permission for general users including the customers, Note: *users without this permission cannot checkout*'
       )
@@ -337,35 +337,6 @@ namespace :spree_roles do
           "Store Credit Management"
       )
 
-      v_d = make_grouped_permission_set(
-          build_permission_group(
-              [
-                  [:admin], Spree::Vendor,
-              ]
-          ),
-          "Vendor Display",
-          "Display Vendors",
-          display: true
-      )
-
-      make_grouped_permission_set(
-          build_permission_group(
-              [
-                  [:admin, :manage], Spree::Vendor
-              ]
-          ),
-          "Vendor management",
-          "Vendor management"
-      )
-
-      vsm = make_grouped_permission_set(
-          [],
-          "Vendor Setting management",
-          "Vendor Setting management"
-      )
-
-      setting_permission_admin  = make_permission('can-admin-vendor_settings', 3)
-      setting_permission_manage = make_permission('can-manage-vendor_settings', 3)
 
       add_to_permission_set(vsm, [setting_permission_admin, setting_permission_manage])
 
