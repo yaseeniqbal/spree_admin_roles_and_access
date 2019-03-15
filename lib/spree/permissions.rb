@@ -2,13 +2,14 @@ module Spree
   module Permissions
     def method_missing(name, *args, &block)
       if name.to_s.starts_with?('can')
-        can, action, subject, attribute , check = find_action_and_subject(name)
-
-        if check.blank?
-          check = {}
-        end
+        
 
         Permissions.send(:define_method, name) do |current_ability, user|
+          can, action, subject, attribute , check = find_action_and_subject.call(name,user)
+
+          if check.blank?
+            check = {}
+          end
           if attribute.nil?
             current_ability.send(can, action, subject,check)
           else
@@ -68,46 +69,47 @@ module Spree
     end
 
     private
-      def find_action_and_subject(name)
-        #for vendor name will be like "can-admin-spree/products#vendor-product"
-        name_default,vendor_data = name.to_s.split('#')
-        user = Current.user
+      def find_action_and_subject
+        lambda do |name,user|
+          #for vendor name will be like "can-admin-spree/products#vendor-product"
+          name_default,vendor_data = name.to_s.split('#')
 
-        if vendor_data.present?
-          vendor = vendor_data.split('-').first
-          vendor_ids = user.vendors.pluck(:id)
-          vendor_key = vendor_data.split('-').last
-        end
-
-        vendorDef = {
-          product: {vendor_id:vendor_ids},
-          order: {vendor_id:vendor_ids},
-          price:   {variant: { vendor_id: vendor_ids }},
-          option_type:   {vendor_id:vendor_ids},
-        } 
-
-        can, action, subject, attribute = name_default.split('-')
-
-        if subject == 'all'
-          if vendor.present? && vendor == 'vendor'
-            return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym), vendorDef[vendor_key]
-          else
-            return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym)
+          if vendor_data.present?
+            vendor = vendor_data.split('-').first
+            vendor_ids = user.vendors.pluck(:id)
+            vendor_key = vendor_data.split('-').last
           end
-        elsif (subject_class = subject.classify.safe_constantize) && subject_class.respond_to?(:ancestors)
-          if vendor.present? && vendor == 'vendor'
-            if vendor_key == 'order'
+
+          vendorDef = {
+            product: {vendor_id:vendor_ids},
+            order: {vendor_id:vendor_ids},
+            price:   {variant: { vendor_id: vendor_ids }},
+            option_type:   {vendor_id:vendor_ids},
+          } 
+
+          can, action, subject, attribute = name_default.split('-')
+
+          if subject == 'all'
+            if vendor.present? && vendor == 'vendor'
+              return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym), vendorDef[vendor_key]
+            else
+              return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym)
             end
-            return can.to_sym, action.to_sym, subject_class, attribute.try(:to_sym), vendorDef[vendor_key.to_sym]
-            #return can.to_sym, action.to_sym, Spree::Product, vendorDef[vendor_key.to_sym]
+          elsif (subject_class = subject.classify.safe_constantize) && subject_class.respond_to?(:ancestors)
+            if vendor.present? && vendor == 'vendor'
+              if vendor_key == 'order'
+              end
+              return can.to_sym, action.to_sym, subject_class, attribute.try(:to_sym), vendorDef[vendor_key.to_sym]
+              #return can.to_sym, action.to_sym, Spree::Product, vendorDef[vendor_key.to_sym]
+            else
+              return can.to_sym, action.to_sym, subject_class, attribute.try(:to_sym)
+            end
           else
-            return can.to_sym, action.to_sym, subject_class, attribute.try(:to_sym)
-          end
-        else
-          if vendor.present? && vendor == 'vendor'
-            return can.to_sym, action.to_sym, subject, attribute.try(:to_sym), vendorDef[vendor_key]
-          else
-            return can.to_sym, action.to_sym, subject, attribute.try(:to_sym)
+            if vendor.present? && vendor == 'vendor'
+              return can.to_sym, action.to_sym, subject, attribute.try(:to_sym), vendorDef[vendor_key]
+            else
+              return can.to_sym, action.to_sym, subject, attribute.try(:to_sym)
+            end
           end
         end
       end
