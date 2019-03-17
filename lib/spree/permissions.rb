@@ -43,6 +43,14 @@ module Spree
       current_ability.can [:read], Spree::State
       current_ability.can [:read], Spree::Country
 
+      current_ability.cannot :read, Spree::Order, [] do |order, token|
+        order.completed? && order.parent_order_id.blank?
+      end
+
+      current_ability.cannot :update, Spree::Order do |order, token|
+        order.completed? && order.parent_order_id.blank?
+      end
+
     end
 
     define_method('default-admin-permissions') do |current_ability, user|
@@ -81,6 +89,7 @@ module Spree
           end
 
           vendorDef = {
+            default: {vendor_id:vendor_ids},
             product: {vendor_id:vendor_ids},
             order: {vendor_id:vendor_ids},
             price:   {variant: { vendor_id: vendor_ids }},
@@ -91,7 +100,8 @@ module Spree
 
           if subject == 'all'
             if vendor.present? && vendor == 'vendor'
-              return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym), vendorDef[vendor_key]
+              vendor_def = vendorDef[vendor_key.to_sym]||vendorDef['default']
+              return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym), vendor_def
             else
               return can.to_sym, action.to_sym, subject.to_sym, attribute.try(:to_sym)
             end
@@ -99,6 +109,7 @@ module Spree
             if vendor.present? && vendor == 'vendor'
               if vendor_key == 'order'
               end
+              vendor_def = vendorDef[vendor_key.to_sym]||vendorDef['default']
               return can.to_sym, action.to_sym, subject_class, attribute.try(:to_sym), vendorDef[vendor_key.to_sym]
               #return can.to_sym, action.to_sym, Spree::Product, vendorDef[vendor_key.to_sym]
             else
@@ -106,7 +117,8 @@ module Spree
             end
           else
             if vendor.present? && vendor == 'vendor'
-              return can.to_sym, action.to_sym, subject, attribute.try(:to_sym), vendorDef[vendor_key]
+              vendor_def = vendorDef[vendor_key.to_sym]||vendorDef['default']
+              return can.to_sym, action.to_sym, subject, attribute.try(:to_sym), vendor_def
             else
               return can.to_sym, action.to_sym, subject, attribute.try(:to_sym)
             end

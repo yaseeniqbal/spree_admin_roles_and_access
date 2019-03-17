@@ -13,7 +13,7 @@ module Spree
 
       user ||= Spree.user_class.new
 
-      user_roles(user).map(&:permissions).flatten.uniq.map { |permission| permission.ability(self, user) }
+      user_roles(user).map(&:permissions).flatten.uniq.sort_by(&:priority).map { |permission| permission.ability(self, user) }
 
       Ability.abilities.each do |clazz|
         ability = clazz.send(:new, user)
