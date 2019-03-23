@@ -43,9 +43,9 @@ module Spree
       current_ability.can [:read], Spree::State
       current_ability.can [:read], Spree::Country
 
-      current_ability.cannot :read, Spree::Order, [] do |order, token|
-        order.completed? && order.parent_order_id.blank?
-      end
+      # current_ability.cannot :read, Spree::Order, [] do |order, token|
+      #   order.completed? && order.parent_order_id.blank?
+      # end
 
       current_ability.cannot :update, Spree::Order do |order, token|
         order.completed? && order.parent_order_id.blank?
