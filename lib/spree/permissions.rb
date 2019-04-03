@@ -50,7 +50,6 @@ module Spree
       current_ability.cannot :update, Spree::Order do |order, token|
         order.completed? && order.parent_order_id.blank?
       end
-
     end
 
     define_method('default-admin-permissions') do |current_ability, user|
@@ -94,7 +93,8 @@ module Spree
             order: {vendor_id:vendor_ids},
             price:   {variant: { vendor_id: vendor_ids }},
             option_type:   {vendor_id:vendor_ids},
-          } 
+            shipment: {order: {vendor_id: vendor_ids}}
+          }
 
           can, action, subject, attribute = name_default.split('-')
 
