@@ -93,7 +93,8 @@ module Spree
             order: {vendor_id:vendor_ids},
             price:   {variant: { vendor_id: vendor_ids }},
             option_type:   {vendor_id:vendor_ids},
-            shipment: {order: {vendor_id: vendor_ids}}
+            shipment: {order: {vendor_id: vendor_ids}},
+            vendor_translation: {spree_vendor_id:vendor_ids}
           }
 
           can, action, subject, attribute = name_default.split('-')
