@@ -2,7 +2,7 @@ module Spree
   module Permissions
     def method_missing(name, *args, &block)
       if name.to_s.starts_with?('can')
-        
+
 
         Permissions.send(:define_method, name) do |current_ability, user|
           can, action, subject, attribute , check = find_action_and_subject.call(name,user)
@@ -94,7 +94,7 @@ module Spree
             price:   {variant: { vendor_id: vendor_ids }},
             option_type:   {vendor_id:vendor_ids},
             shipment: {order: {vendor_id: vendor_ids}},
-            vendor_translation: {spree_vendor_id:vendor_ids}
+            vendor: {id:  vendor_ids}
           }
 
           can, action, subject, attribute = name_default.split('-')
