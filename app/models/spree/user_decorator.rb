@@ -1,5 +1,5 @@
 module Spree
-  Spree.user_class.class_eval do
+  module UserDecorator
     alias_attribute :roles, :spree_roles
   end
 end

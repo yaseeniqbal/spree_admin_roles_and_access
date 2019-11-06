@@ -338,7 +338,7 @@ namespace :spree_roles do
       )
 
 
-      add_to_permission_set(vsm, [setting_permission_admin, setting_permission_manage])
+      # add_to_permission_set(vsm, [setting_permission_admin, setting_permission_manage])
 
       user_display, user_edit, user_delete = make_resource_permission_set('spree/users')
 
